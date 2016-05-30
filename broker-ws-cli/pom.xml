@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <!-- http://maven.apache.org/pom.html#Quick_Overview -->
+
+    <!-- Please replace 'cxx' below with 
+        your c (campus) with a (Alameda) / t (Tagus); and 
+        your group number with two digits.
+        Then delete this comment. -->
+    <groupId>pt.upa.a20</groupId>
+    <artifactId>broker-ws-cli</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>${project.artifactId}</name>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+
+        <wsdl.directory>${basedir}/../broker-ws/src/main/resources</wsdl.directory>
+        <wsdl.filename>broker.1_0.wsdl</wsdl.filename>
+
+        <mainclass>pt.upa.broker.BrokerClientApplication</mainclass>
+
+        <ws.name>UpaBroker</ws.name>
+        <uddi.url>http://localhost:9090</uddi.url>
+    </properties>
+
+    <dependencies>
+    	<!-- UDDI Naming -->
+	    <dependency>
+	        <groupId>pt.ulisboa.tecnico.sdis</groupId>
+	        <artifactId>uddi-naming</artifactId>
+	        <version>1.1</version>
+	    </dependency>
+        <!-- JAX-WS -->
+        <dependency>
+            <groupId>com.sun.xml.ws</groupId>
+            <artifactId>jaxws-rt</artifactId>
+            <version>2.2.10</version>
+        </dependency>
+        <!-- JMockit - must appear before JUnit -->
+        <dependency>
+            <groupId>org.jmockit</groupId>
+            <artifactId>jmockit</artifactId>
+            <version>1.21</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- JUnit -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+                <filtering>true</filtering>
+            </testResource>
+        </testResources>
+        <plugins>
+            <plugin>
+                <groupId>org.jvnet.jax-ws-commons</groupId>
+                <artifactId>jaxws-maven-plugin</artifactId>
+                <version>2.3</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>wsimport</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <!-- https://jax-ws-commons.java.net/jaxws-maven-plugin/wsimport-mojo.html -->
+                    <wsdlDirectory>${wsdl.directory}</wsdlDirectory>
+                    <wsdlFiles>
+                        <wsdlFile>${wsdl.filename}</wsdlFile>
+                    </wsdlFiles>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.sun.xml.ws</groupId>
+                        <artifactId>jaxws-tools</artifactId>
+                        <version>2.2.10</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+            <plugin>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>2.19.1</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.4.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <!-- to prevent deprecation warning: -->
+                    <killAfter>-1</killAfter>
+                    <mainClass>${mainclass}</mainClass>
+                    <arguments>
+                    	<argument>${uddi.url}</argument>
+                        <argument>${ws.name}</argument>
+                    </arguments>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>appassembler-maven-plugin</artifactId>
+                <version>1.10</version>
+                <executions>
+                    <execution>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>assemble</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <programs>
+                        <program>
+                            <mainClass>${mainclass}</mainClass>
+                            <id>${project.artifactId}</id>
+                        </program>
+                    </programs>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
